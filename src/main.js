@@ -1,7 +1,6 @@
 import * as THREE from 'three';
-// import './script.js'; // Asegúrate de que las rutas sean correctas
-
-// import { Scene, PerspectiveCamera, WebGLRenderer, TextureLoader, SphereGeometry, MeshStandardMaterial, Mesh, PointLight } from 'three';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 
 // Crea la escena, cámara y renderizador
 const scene = new THREE.Scene();
@@ -22,31 +21,69 @@ const planet = new THREE.Mesh(planetGeometry, planetMaterial);
 scene.add(planet);
 
 // Añade luz para que el planeta sea visible
-
-// const light = new THREE.PointLight(0xffffff, 1.5, 150); // Aumenta la intensidad y el alcance
-
-// Luz principal (simula el sol)
-
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5); // Aumenta la intensidad y el alcance
-directionalLight.position.set(3, 3, 3); // Ubica la luz en una posición lejana y diagonal al planeta
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+directionalLight.position.set(3, 3, 3);
 scene.add(directionalLight);
 
 // Luz ambiental para rellenar sombras
- const ambientLight = new THREE.AmbientLight(0x404040, 0.4); // Luz suave en todo el ambiente
-// scene.add(ambientLight);
+const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+scene.add(ambientLight);
 
- const hemisphereLight = new THREE.HemisphereLight(0x87CEEB, 0x333333, 0.9); // Azul cielo y gris oscuro para el suelo
-// scene.add(hemisphereLight);
+const hemisphereLight = new THREE.HemisphereLight(0x87CEEB, 0x333333, 0.9);
+scene.add(hemisphereLight);
 
 // Posición inicial de la cámara
 camera.position.z = 3;
 
-// Función de animación para rotar el planeta
-function animate() {
-    requestAnimationFrame(animate);
-    planet.rotation.y += 0.004;  // Rotación del planeta sobre su eje Y
-    renderer.render(scene, camera);
-}
+// Añadir el texto giratorio
+const fontLoader = new FontLoader();
+fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', (font) => {
+    // Crear geometría de texto
+    const textGeometry = new TextGeometry('Hello, Planet!', {
+        font: font,
+        size: 0.2,
+        height: 0.05,
+        curveSegments: 12,
+        bevelEnabled: true,
+        bevelThickness: 0.03,
+        bevelSize: 0.02,
+        bevelOffset: 0,
+        bevelSegments: 5
+    });
+
+    // Material del texto
+    const textMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+
+    // Posición inicial del texto (orbita del planeta)
+    const orbitRadius = 2; // Radio de la órbita del texto
+    textMesh.position.set(orbitRadius, 0, 0);
+    scene.add(textMesh);
+
+    // Animación de rotación alrededor del planeta
+    let angle = 0;
+    function animateText() {
+        angle += 0.01; // Ajusta la velocidad de rotación cambiando este valor
+        textMesh.position.x = orbitRadius * Math.cos(angle);
+        textMesh.position.z = orbitRadius * Math.sin(angle);
+    }
+
+    // Llamar a la animación principal
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // Rotación del planeta (ya existente en tu código)
+        planet.rotation.y += 0.004;
+
+        // Animación del texto
+        animateText();
+
+        renderer.render(scene, camera);
+    }
+
+    // Iniciar la animación
+    animate();
+});
 
 // Ajustar tamaño del renderizador y cámara al cambiar el tamaño de la ventana
 window.addEventListener('resize', () => {
@@ -56,6 +93,3 @@ window.addEventListener('resize', () => {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
 });
-
-// Iniciar la animación
-animate();
