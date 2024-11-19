@@ -35,7 +35,7 @@ camera.position.z = 3;
 // Configuración para el texto curvado alrededor del planeta
 const orbitRadiusX = 2.5;
 const orbitRadiusZ = 1.5;
-const text = "Hello, Planet!";
+const text = "!tenalp ,olleH";
 
 // Cargar la fuente y crear los caracteres individuales
 const fontLoader = new FontLoader();
@@ -72,26 +72,63 @@ fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.
             letter.position.x = orbitRadiusX * Math.cos(charAngle);
             letter.position.z = orbitRadiusZ * Math.sin(charAngle);
             letter.position.y = 0;
-
-            // Hacer que cada letra mire al centro del planeta
-            letter.lookAt(planet.position);
+       
         });
     }
 
-    // Llamar a la animación principal
-    function animate() {
-        requestAnimationFrame(animate);
+   // Crear un sistema de partículas para las estrellas
+function createStars() {
+    const starGeometry = new THREE.BufferGeometry();
+    const starMaterial = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.01,
+    });
 
-        // Rotación del planeta
-        planet.rotation.y += 0.004;
+    const starCount = 1000;
+    const positions = [];
 
-        // Animación del texto
-        animateText();
-
-        renderer.render(scene, camera);
+    for (let i = 0; i < starCount; i++) {
+        const x = (Math.random() - 0.5) * 50; // Distribución aleatoria
+        const y = (Math.random() - 0.5) * 50;
+        const z = (Math.random() - 0.5) * 50;
+        positions.push(x, y, z);
     }
 
-    animate();
+    starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    const stars = new THREE.Points(starGeometry, starMaterial);
+
+    scene.add(stars);
+
+    // Animar las estrellas (simular un efecto de movimiento espacial)
+    function animateStars() {
+        stars.rotation.x += 0.0005;
+        stars.rotation.y += 0.0005;
+    }
+
+    return animateStars;
+}
+
+// Crear las estrellas y obtener su animación
+const animateStars = createStars();
+
+// Integrar la animación de las estrellas en el bucle principal
+function animate() {
+    requestAnimationFrame(animate);
+
+    // Rotación del planeta
+    planet.rotation.y += 0.004;
+
+    // Animación del texto
+    animateText();
+
+    // Animación de las estrellas
+    animateStars();
+
+    renderer.render(scene, camera);
+}
+
+animate();
+
 });
 
 // Ajustar tamaño del renderizador y cámara al cambiar el tamaño de la ventana
